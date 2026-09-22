@@ -94,6 +94,24 @@ services:
     networks:
       - 5gcore-net
 
+  ue-sim:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["./5gcore-ue-sim"]
+    environment:
+      UE_HOST: "0.0.0.0"
+      UE_PORT: "8006"
+      AMF_URL: "http://amf:8001"
+      UE_IMSI: "310150123456789"
+    depends_on:
+      - amf
+      - nrf
+    ports:
+      - "8006:8006"
+    networks:
+      - 5gcore-net
+
 networks:
   5gcore-net:
     driver: bridge

@@ -1,0 +1,27 @@
+sequenceDiagram
+    participant UE as UE Simulator
+    participant AMF as AMF
+    participant AUSF as AUSF
+    participant UDM as UDM
+    participant SMF as SMF
+    participant UPF as UPF
+
+    UE->>AMF: Attach Request (IMSI)
+    AMF->>AUSF: Authenticate
+    AUSF-->>AMF: Auth Token / Security Context
+    AMF->>UDM: Fetch Subscriber Profile
+    UDM-->>AMF: Allowed Slice / DNN Policy
+    AMF->>SMF: Create PDU Session
+    SMF->>UPF: Allocate User-Plane Anchor
+    UPF-->>SMF: Forwarding Ready
+    SMF-->>AMF: Session Context
+    AMF-->>UE: Attach Accepted
+
+    Note over UE,AMF: UE lifecycle: connected -> registered -> active session
+
+    UE->>AMF: Release / Deactivate
+    AMF->>SMF: Release Session
+    SMF-->>AMF: Session Inactive
+    AMF-->>UE: Released
+
+    Note over UE,AMF: UE lifecycle: idle -> detached
