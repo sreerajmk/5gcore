@@ -1,7 +1,7 @@
 package main
-package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -23,10 +23,35 @@ func main() {
 	mux.HandleFunc("/discover", func(w http.ResponseWriter, r *http.Request) {
 		if raw, err := service.Discover("amf"); err == nil {
 			w.Header().Set("Content-Type", "application/json")
-			_, _ = w.Write([]byte(fmt.Sprintf("%v", raw)))
+			_ = json.NewEncoder(w).Encode(raw)
 			return
 		}
 		w.WriteHeader(http.StatusNotFound)
+	})
+	mux.HandleFunc("/create-session", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+		var request map[string]any
+		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+			http.Error(w, "invalid session payload", http.StatusBadRequest)
+			return
+		}
+		imsi := fmt.Sprint(request["imsi"])
+		response := map[string]any{
+			"status":             "session-created",
+			"smf":                service.Name,
+			"imsi":               imsi,
+			"pduSessionId":       request["pduSessionId"],
+			"dnn":                request["dnn"],
+			"sNssai":             request["sNssai"],
+			"upfAnchor":          "upf:80",
+			"sessionAmbr":        "1 Gbps",
+			"notificationTarget": "amf",
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(response)
 	})
 	addr := fmt.Sprintf("%s:%d", service.Host, service.Port)
 	log.Printf("SMF service starting on %s", addr)

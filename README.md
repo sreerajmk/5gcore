@@ -1,30 +1,62 @@
-# 5G Core Microservice Skeleton
+# 5G Core Microservice Demo
 
-This project implements a minimal 5G core microservice architecture in Python using FastAPI.
+This project implements a simplified 5G core network function mesh in Go using a microservice design with an NRF registration and discovery anchor.
 
-## Network functions
+## Included network functions
 
+- NRF: Network Repository Function
 - AMF: Access and Mobility Management Function
 - SMF: Session Management Function
 - AUSF: Authentication Server Function
 - UPF: User Plane Function
 - UDM: Unified Data Management
-- NRF: Network Repository Function / service discovery anchor
 
-## How it works
+## Realistic 5G flow
 
-- Each network function exposes a FastAPI app with `/health`, `/status`, and registration endpoints.
-- The NRF keeps an in-memory registry of all active network functions.
-- Network functions can register with the NRF at startup and query the NRF for other NFs when needed.
+The AMF orchestrates a realistic attach / registration flow:
 
-## Run locally
+1. UE sends an attach request to the AMF.
+2. AMF discovers the AUSF through the NRF.
+3. AUSF authenticates the subscriber and returns an auth token.
+4. AMF fetches subscriber profile data from the UDM.
+5. AMF calls the SMF to create a PDU session.
+6. SMF returns session context and UPF anchor details.
+
+This is intentionally simplified, but it mirrors the expected service interaction pattern used in a real 5G core.
+
+## Run with Go
 
 ```bash
-python -m pip install -r requirements.txt
-python run_all.py
+cd /home/felicity/learn/5gcore
+
+go run ./cmd/nrf
+
+go run ./cmd/amf
+
+go run ./cmd/smf
+
+go run ./cmd/ausf
+
+go run ./cmd/upf
+
+go run ./cmd/udm
 ```
 
-The default ports are:
+## Run with Docker Compose
+
+```bash
+docker compose up --build
+```
+
+Then test the attach procedure:
+
+```bash
+curl -X POST http://localhost:8001/procedure/attach \
+  -H 'Content-Type: application/json' \
+  -d '{"imsi":"310150123456789"}'
+```
+
+## Default ports
 
 - NRF: 8000
 - AMF: 8001

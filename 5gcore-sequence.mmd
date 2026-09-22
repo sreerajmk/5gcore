@@ -1,0 +1,27 @@
+sequenceDiagram
+    participant UE as UE / Device
+    participant AMF as AMF
+    participant NRF as NRF
+    participant AUSF as AUSF
+    participant UDM as UDM
+    participant SMF as SMF
+    participant UPF as UPF
+
+    UE->>AMF: Attach Request (IMSI)
+    AMF->>NRF: Discover AUSF
+    NRF-->>AMF: AUSF endpoint
+    AMF->>AUSF: Authenticate(IMSI)
+    AUSF-->>AMF: Auth token / security context
+
+    AMF->>NRF: Discover UDM
+    NRF-->>AMF: UDM endpoint
+    AMF->>UDM: Subscriber Profile Request
+    UDM-->>AMF: Allowed slicing + default DNN
+
+    AMF->>NRF: Discover SMF
+    NRF-->>AMF: SMF endpoint
+    AMF->>SMF: Create PDU Session
+    SMF->>UPF: Configure forwarding
+    SMF-->>AMF: Session context + UPF anchor
+
+    AMF-->>UE: Attach accepted / session ready

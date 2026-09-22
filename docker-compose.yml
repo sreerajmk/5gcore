@@ -1,0 +1,99 @@
+version: "3.9"
+
+services:
+  nrf:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["./5gcore-nrf"]
+    environment:
+      NRF_HOST: "0.0.0.0"
+      NRF_PORT: "8000"
+    ports:
+      - "8000:8000"
+    networks:
+      - 5gcore-net
+
+  amf:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["./5gcore-amf"]
+    environment:
+      NRF_URL: "http://nrf:8000"
+      NF_HOST: "amf"
+      NF_PORT: "8001"
+    depends_on:
+      - nrf
+    ports:
+      - "8001:8001"
+    networks:
+      - 5gcore-net
+
+  smf:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["./5gcore-smf"]
+    environment:
+      NRF_URL: "http://nrf:8000"
+      NF_HOST: "smf"
+      NF_PORT: "8002"
+    depends_on:
+      - nrf
+    ports:
+      - "8002:8002"
+    networks:
+      - 5gcore-net
+
+  ausf:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["./5gcore-ausf"]
+    environment:
+      NRF_URL: "http://nrf:8000"
+      NF_HOST: "ausf"
+      NF_PORT: "8003"
+    depends_on:
+      - nrf
+    ports:
+      - "8003:8003"
+    networks:
+      - 5gcore-net
+
+  udm:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["./5gcore-udm"]
+    environment:
+      NRF_URL: "http://nrf:8000"
+      NF_HOST: "udm"
+      NF_PORT: "8005"
+    depends_on:
+      - nrf
+    ports:
+      - "8005:8005"
+    networks:
+      - 5gcore-net
+
+  upf:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["./5gcore-upf"]
+    environment:
+      NRF_URL: "http://nrf:8000"
+      NF_HOST: "upf"
+      NF_PORT: "8004"
+    depends_on:
+      - nrf
+    ports:
+      - "8004:8004"
+    networks:
+      - 5gcore-net
+
+networks:
+  5gcore-net:
+    driver: bridge

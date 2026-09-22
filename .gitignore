@@ -1,0 +1,60 @@
+# Build directories
+build/
+**/build/
+**/CMakeFiles/
+**/cmake-build-*/
+**/.cmake/
+
+# Generated binaries and artifacts
+*.o
+*.obj
+*.a
+*.so
+*.so.*
+*.dylib
+*.dll
+*.exe
+*.out
+*.app
+*.bin
+*.test
+
+# Go build and dependency artifacts
+**/bin/
+**/.cache/
+**/coverage.out
+**/*.cover
+**/*.sum
+**/*.mod
+**/*.tmp
+**/tmp/
+
+# CMake generated files
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+CTestTestfile.cmake
+install_manifest.txt
+compile_commands.json
+
+# Compiler and editor noise
+*.log
+*.tmp
+*.swp
+*.swo
+.DS_Store
+.vscode/
+.idea/
+
+# Local runtime artifacts
+*.pid
+*.core
+
+# Project-specific generated files
+railroad/ipc/build/
+railroad/**/build/
+5gcore/bin/
+5gcore/tmp/
+5gcore/.cache/
+5gcore/**/*.log
+5gcore/**/*.pid
