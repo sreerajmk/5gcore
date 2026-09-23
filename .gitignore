@@ -58,3 +58,9 @@ railroad/**/build/
 5gcore/.cache/
 5gcore/**/*.log
 5gcore/**/*.pid
+
+# Generated Go service binaries for this demo
+/amf
+/smf
+/gnb
+/ue-sim

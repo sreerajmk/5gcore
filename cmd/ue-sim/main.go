@@ -66,6 +66,7 @@ func callJSON(method, target string, payload any, out any) error {
 func main() {
 	host := getEnv("UE_HOST", "127.0.0.1")
 	port := getEnvInt("UE_PORT", 8006)
+	gnbURL := getEnv("GNB_URL", "http://127.0.0.1:8010")
 	amfURL := getEnv("AMF_URL", "http://127.0.0.1:8001")
 	imsi := getEnv("UE_IMSI", "310150123456789")
 
@@ -76,6 +77,7 @@ func main() {
 			"status":  "ok",
 			"service": "ue-sim",
 			"imsi":    imsi,
+			"gNB":     gnbURL,
 			"amf":     amfURL,
 		})
 	})
@@ -85,6 +87,7 @@ func main() {
 		_ = json.NewEncoder(w).Encode(map[string]any{
 			"imsi":           imsi,
 			"deviceState":    "idle",
+			"gNBURL":         gnbURL,
 			"amfURL":         amfURL,
 			"lastUpdated":    time.Now().UTC().Format(time.RFC3339),
 			"simulatorReady": true,
@@ -127,8 +130,8 @@ func main() {
 		}
 
 		var response map[string]any
-		if err := callJSON(http.MethodPost, amfURL+"/procedure/attach", payload, &response); err != nil {
-			http.Error(w, fmt.Sprintf("attach failed: %v", err), http.StatusBadGateway)
+		if err := callJSON(http.MethodPost, gnbURL+"/attach", payload, &response); err != nil {
+			http.Error(w, fmt.Sprintf("gNodeB attach failed: %v", err), http.StatusBadGateway)
 			return
 		}
 
@@ -136,9 +139,10 @@ func main() {
 		_ = json.NewEncoder(w).Encode(map[string]any{
 			"ue":                 "simulator",
 			"imsi":               imsi,
+			"targetGNB":          gnbURL,
 			"targetAMF":          amfURL,
 			"attachRequest":      payload,
-			"amfResponse":        response,
+			"gNBResponse":        response,
 			"simulatorTimestamp": time.Now().UTC().Format(time.RFC3339),
 		})
 	})
@@ -150,8 +154,8 @@ func main() {
 		}
 		payload := map[string]any{"imsi": imsi, "securityMode": "5G-AKA"}
 		var response map[string]any
-		if err := callJSON(http.MethodPost, amfURL+"/ue/register", payload, &response); err != nil {
-			http.Error(w, fmt.Sprintf("register failed: %v", err), http.StatusBadGateway)
+		if err := callJSON(http.MethodPost, gnbURL+"/ue/register", payload, &response); err != nil {
+			http.Error(w, fmt.Sprintf("gNodeB registration failed: %v", err), http.StatusBadGateway)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -170,8 +174,8 @@ func main() {
 		}
 		payload := map[string]any{"imsi": imsi}
 		var response map[string]any
-		if err := callJSON(http.MethodPost, amfURL+"/ue/release", payload, &response); err != nil {
-			http.Error(w, fmt.Sprintf("release failed: %v", err), http.StatusBadGateway)
+		if err := callJSON(http.MethodPost, gnbURL+"/ue/release", payload, &response); err != nil {
+			http.Error(w, fmt.Sprintf("gNodeB release failed: %v", err), http.StatusBadGateway)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -190,8 +194,8 @@ func main() {
 		}
 		payload := map[string]any{"imsi": imsi, "reason": "ue-triggered-deactivation"}
 		var response map[string]any
-		if err := callJSON(http.MethodPost, amfURL+"/ue/release", payload, &response); err != nil {
-			http.Error(w, fmt.Sprintf("deactivation failed: %v", err), http.StatusBadGateway)
+		if err := callJSON(http.MethodPost, gnbURL+"/ue/release", payload, &response); err != nil {
+			http.Error(w, fmt.Sprintf("gNodeB deactivation failed: %v", err), http.StatusBadGateway)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -209,8 +213,8 @@ func main() {
 			return
 		}
 		var response map[string]any
-		if err := callJSON(http.MethodGet, amfURL+"/pdu-session/status?imsi="+imsi, nil, &response); err != nil {
-			http.Error(w, fmt.Sprintf("session status lookup failed: %v", err), http.StatusBadGateway)
+		if err := callJSON(http.MethodGet, gnbURL+"/pdu-session/status?imsi="+imsi, nil, &response); err != nil {
+			http.Error(w, fmt.Sprintf("gNodeB session status lookup failed: %v", err), http.StatusBadGateway)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -223,13 +227,13 @@ func main() {
 			return
 		}
 		var attach map[string]any
-		if err := callJSON(http.MethodPost, amfURL+"/procedure/attach", map[string]any{"imsi": imsi, "securityMode": "5G-AKA", "plmn": "00101"}, &attach); err != nil {
-			http.Error(w, fmt.Sprintf("simulate attach failed: %v", err), http.StatusBadGateway)
+		if err := callJSON(http.MethodPost, gnbURL+"/attach", map[string]any{"imsi": imsi, "securityMode": "5G-AKA", "plmn": "00101"}, &attach); err != nil {
+			http.Error(w, fmt.Sprintf("simulate gNodeB attach failed: %v", err), http.StatusBadGateway)
 			return
 		}
 		var status map[string]any
-		if err := callJSON(http.MethodGet, amfURL+"/pdu-session/status?imsi="+imsi, nil, &status); err != nil {
-			http.Error(w, fmt.Sprintf("simulate status lookup failed: %v", err), http.StatusBadGateway)
+		if err := callJSON(http.MethodGet, gnbURL+"/pdu-session/status?imsi="+imsi, nil, &status); err != nil {
+			http.Error(w, fmt.Sprintf("simulate gNodeB status lookup failed: %v", err), http.StatusBadGateway)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")

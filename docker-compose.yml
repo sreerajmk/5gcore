@@ -102,13 +102,33 @@ services:
     environment:
       UE_HOST: "0.0.0.0"
       UE_PORT: "8006"
+      GNB_URL: "http://gnb:8010"
       AMF_URL: "http://amf:8001"
       UE_IMSI: "310150123456789"
     depends_on:
+      - gnb
       - amf
       - nrf
     ports:
       - "8006:8006"
+    networks:
+      - 5gcore-net
+
+  gnb:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["./5gcore-gnb"]
+    environment:
+      GNB_HOST: "0.0.0.0"
+      GNB_PORT: "8010"
+      AMF_URL: "http://amf:8001"
+      GNB_CELL_ID: "cell-1"
+    depends_on:
+      - amf
+      - nrf
+    ports:
+      - "8010:8010"
     networks:
       - 5gcore-net
 
