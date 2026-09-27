@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ue-sim
+  labels:
+    app: ue-sim
+spec:
+  selector:
+    app: ue-sim
+  ports:
+    - name: http
+      port: 8006
+      targetPort: 8006
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ue-sim
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ue-sim
+  template:
+    metadata:
+      labels:
+        app: ue-sim
+    spec:
+      containers:
+        - name: ue-sim
+          image: 5gcore:latest
+          imagePullPolicy: IfNotPresent
+          command: ["/app/5gcore-ue-sim"]
+          env:
+            - name: UE_HOST
+              value: "0.0.0.0"
+            - name: UE_PORT
+              value: "8006"
+            - name: GNB_URL
+              value: "http://gnb:8010"
+            - name: AMF_URL
+              value: "http://amf:8001"
+            - name: UE_IMSI
+              value: "310150123456789"
+          ports:
+            - containerPort: 8006

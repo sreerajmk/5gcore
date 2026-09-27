@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: upf
+  labels:
+    app: upf
+spec:
+  selector:
+    app: upf
+  ports:
+    - name: http
+      port: 8004
+      targetPort: 8004
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: upf
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: upf
+  template:
+    metadata:
+      labels:
+        app: upf
+    spec:
+      containers:
+        - name: upf
+          image: 5gcore:latest
+          imagePullPolicy: IfNotPresent
+          command: ["/app/5gcore-upf"]
+          env:
+            - name: NRF_URL
+              value: "http://nrf:8000"
+            - name: NF_HOST
+              value: "upf"
+            - name: NF_PORT
+              value: "8004"
+          ports:
+            - containerPort: 8004

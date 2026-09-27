@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: udm
+  labels:
+    app: udm
+spec:
+  selector:
+    app: udm
+  ports:
+    - name: http
+      port: 8005
+      targetPort: 8005
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: udm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: udm
+  template:
+    metadata:
+      labels:
+        app: udm
+    spec:
+      containers:
+        - name: udm
+          image: 5gcore:latest
+          imagePullPolicy: IfNotPresent
+          command: ["/app/5gcore-udm"]
+          env:
+            - name: NRF_URL
+              value: "http://nrf:8000"
+            - name: NF_HOST
+              value: "udm"
+            - name: NF_PORT
+              value: "8005"
+          ports:
+            - containerPort: 8005

@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gnb
+  labels:
+    app: gnb
+spec:
+  selector:
+    app: gnb
+  ports:
+    - name: http
+      port: 8010
+      targetPort: 8010
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gnb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gnb
+  template:
+    metadata:
+      labels:
+        app: gnb
+    spec:
+      containers:
+        - name: gnb
+          image: 5gcore:latest
+          imagePullPolicy: IfNotPresent
+          command: ["/app/5gcore-gnb"]
+          env:
+            - name: GNB_HOST
+              value: "0.0.0.0"
+            - name: GNB_PORT
+              value: "8010"
+            - name: AMF_URL
+              value: "http://amf:8001"
+            - name: GNB_CELL_ID
+              value: "cell-1"
+          ports:
+            - containerPort: 8010

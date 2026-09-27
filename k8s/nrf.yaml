@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nrf
+  labels:
+    app: nrf
+spec:
+  selector:
+    app: nrf
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nrf
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nrf
+  template:
+    metadata:
+      labels:
+        app: nrf
+    spec:
+      containers:
+        - name: nrf
+          image: 5gcore:latest
+          imagePullPolicy: IfNotPresent
+          command: ["/app/5gcore-nrf"]
+          env:
+            - name: NRF_HOST
+              value: "0.0.0.0"
+            - name: NRF_PORT
+              value: "8000"
+          ports:
+            - containerPort: 8000
